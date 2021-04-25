@@ -1,0 +1,1 @@
+pybind11_add_module(cpu_op cpu_op.cpp)
