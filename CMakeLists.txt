@@ -7,6 +7,8 @@ set(build-cpu ON)
 set(build-gpu OFF)
 set(build-mlu OFF)
 
+add_subdirectory(common)
+
 if (${build-cpu})
     add_subdirectory(CPU)
 endif ()
