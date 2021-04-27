@@ -1,5 +1,5 @@
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake
-        CACHE STRING "Vcpkg toolchain file")
+#set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake
+#        CACHE STRING "Vcpkg toolchain file")
 
 project(matmul-conv)
 cmake_minimum_required(VERSION 3.10)
@@ -7,8 +7,8 @@ cmake_minimum_required(VERSION 3.10)
 add_subdirectory(pybind11)
 
 set(build-cpu ON)
-set(build-gpu ON)
-set(build-mlu OFF)
+set(build-gpu OFF)
+set(build-mlu ON)
 
 if (${build-cpu})
     add_subdirectory(CPU)

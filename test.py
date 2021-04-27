@@ -2,7 +2,7 @@ import time
 
 import cpu_op
 import numpy as np
-import gpu_op
+# import gpu_op
 
 M = np.random.rand(20, 900000)
 N = np.random.rand(900000, 14)
@@ -22,4 +22,4 @@ def cal_time(prefix, fn):
 cal_time('Numpy base', np.matmul)
 cpu_op.cpu_matmul_base(M, N)
 cal_time('CPU base', cpu_op.cpu_matmul_base)
-cal_time('GPU base', gpu_op.gpu_matmul_base)
+# cal_time('GPU base', gpu_op.gpu_matmul_base)

@@ -1,0 +1,1 @@
+pybind11_add_module(mlu_op mlu_op.cpp)
