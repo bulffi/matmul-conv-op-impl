@@ -11,10 +11,7 @@
 extern "C" {
 #endif
 
-typedef uint16_t half;
-
-// TODO：BCL接口定义
-void PowerDifferenceKernel(half* input1,half* input2,int32_t pow,half* output,int32_t dims_a);
+int MLUPowerDifferenceOp(float* input1,float* input2, int pow, float*output, int dims_a);
 double* cpu_matmul(double* input, double* weight, std::size_t H, std::size_t K, std::size_t W);
 
 

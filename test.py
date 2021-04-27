@@ -19,7 +19,11 @@ def cal_time(prefix, fn):
     print('{} loss: {}'.format(prefix, loss))
 
 
-cal_time('Numpy base', np.matmul)
-cpu_op.cpu_matmul_base(M, N)
-cal_time('CPU base', cpu_op.cpu_matmul_base)
+# cal_time('Numpy base', np.matmul)
+# cpu_op.cpu_matmul_base(M, N)
+# cal_time('CPU base', cpu_op.cpu_matmul_base)
 # cal_time('GPU base', gpu_op.gpu_matmul_base)
+
+import mlu_op
+R = mlu_op.mlu_matmul_base(M, N)
+print(R)

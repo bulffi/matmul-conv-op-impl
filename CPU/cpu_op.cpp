@@ -42,5 +42,5 @@ pybind11::array_t<double> cpu_matmul_base(const pybind11::array_t<double>& M, co
 
 PYBIND11_MODULE(cpu_op, m){
     m.doc() = "matmul & conv with cpu";
-    m.def("cpu_matmul_base", &cpu_matmul_base, "multiply 2 matrix");
+    m.def("cpu_matmul_base", &cpu_matmul_base, "multiply 2 matrix with cpu");
 }

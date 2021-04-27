@@ -112,7 +112,3 @@ int MLUPowerDifferenceOp(float* input1,float* input2, int pow, float*output, int
   free(output_half);
   return 0;
 }
-
-int main() {
-  return 0;
-}
