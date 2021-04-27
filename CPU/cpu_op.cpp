@@ -4,46 +4,43 @@
 
 #include <iostream>
 #include "cpu_op.h"
-#include "pybind11/pybind11.h"
-#include "pybind11/numpy.h"
 
-double* cpu_matmul(double* input, double* weight, std::size_t H, std::size_t K, std::size_t W){
-    return nullptr;
-}
-double* cpu_conv2d(double* input, double* weight, std::size_t batch, std::size_t H, std::size_t W,
-                   std::size_t C, std::size_t w_H, std::size_t w_W, std::size_t w_batch) {
-    return nullptr;
-}
+pybind11::array_t<double> cpu_matmul_base(const pybind11::array_t<double>& M, const pybind11::array_t<double>& N) {
+    auto m = M.unchecked<2>();
+    auto n = N.unchecked<2>();
+    std::size_t m_x = m.shape(0);
+    std::size_t m_y = m.shape(1);
+    std::size_t n_x = n.shape(0);
+    std::size_t n_y = n.shape(1);
+    std::size_t output_size = m_x * n_y;
+    auto *result = new double[output_size];
 
-int add(int a, int b) {
-    return a + b + 1;
-}
+    /// =========================================
 
-pybind11::array_t<double> return_array() {
-    constexpr size_t size = 100*1000*1000;
-    auto *foo = new double[size];
-    for (size_t i = 0; i < size; i++) {
-        foo[i] = (double) i;
+    for (int i = 0; i < m_x; ++i) {
+        for (int j = 0; j < n_y; ++j) {
+            double tempt_sum = 0;
+            for (int k = 0; k < m_y; ++k) {
+                tempt_sum += m(i, k) * n(k, j);
+            }
+            result[i * n.shape(1) + j] = tempt_sum;
+        }
     }
 
-    // Create a Python object that will free the allocated
-    // memory when destroyed:
-    pybind11::capsule free_when_done(foo, [](void *f) {
+    /// =========================================
+
+    pybind11::capsule free_when_done(result, [](void *f) {
         auto *foo = reinterpret_cast<double *>(f);
-        std::cerr << "Element [0] = " << foo[0] << "\n";
-        std::cerr << "freeing memory @ " << f << "\n";
         delete[] foo;
     });
-
-    return pybind11::array_t<double>(
-            {100, 1000, 1000}, // shape
-            {1000*1000*8, 1000*8, 8}, // C-style contiguous strides for double
-            foo, // the data pointer
-            free_when_done); // numpy array references this parent
+    return pybind11::array_t<double> {
+            {m_x, n_y},
+            result,
+            free_when_done
+    };
 }
 
 PYBIND11_MODULE(cpu_op, m){
     m.doc() = "matmul & conv with cpu";
-    m.def("cpu_matmul", &cpu_matmul, "multiply 2 matrix");
-    m.def("add", &add, "A strange addition");
+    m.def("cpu_matmul_base", &cpu_matmul_base, "multiply 2 matrix");
 }

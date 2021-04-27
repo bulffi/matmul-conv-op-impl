@@ -1,3 +1,3 @@
 enable_language(CUDA)
 
-add_executable(cuda gpu_op.cu)
+pybind11_add_module(gpu_op gpu_op.cu)

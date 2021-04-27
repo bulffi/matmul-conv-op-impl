@@ -3,5 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/pybind11" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vcpkg" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vcpkg/downloads/git-tmp" vcs="Git" />
   </component>
 </project>
