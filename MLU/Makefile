@@ -3,7 +3,7 @@ libmlu.so: mlu_fn.o mlu_stub.o
 
 
 mlu_fn.o: mlu_op.mlu
-	cncc --bang-mlu-arch=MLU200 -c mlu_op.mlu -o mlu_fn.o
+	cncc --bang-mlu-arch=MLU270 -c mlu_op.mlu -o mlu_fn.o
 
 mlu_stub.o:
 	g++ -I${NEUWARE_HOME}/include -std=c++11 -c -fPIC mlu_op.cpp -o mlu_stub.o

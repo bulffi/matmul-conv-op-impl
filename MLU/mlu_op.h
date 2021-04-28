@@ -11,9 +11,7 @@
 extern "C" {
 #endif
 
-int MLUPowerDifferenceOp(float* input1,float* input2, int pow, float*output, int dims_a);
-double* cpu_matmul(double* input, double* weight, std::size_t H, std::size_t K, std::size_t W);
-
+    int mlu_matmul(const float* input, const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W);
 
 #ifdef __cplusplus
 }

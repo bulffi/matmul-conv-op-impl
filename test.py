@@ -6,8 +6,8 @@ import numpy as np
 
 M = np.random.rand(20, 900000)
 N = np.random.rand(900000, 14)
-# M = np.array([[1.0, 2.0], [3.0, 4.0]])
-# N = np.array([[4.0, 5.0], [6.0, 7.0]])
+M = np.array([[1.0, 2.0], [3.0, 4.0]])
+N = np.array([[4.0, 5.0], [6.0, 7.0]])
 R_ = np.matmul(M, N)
 
 def cal_time(prefix, fn):
