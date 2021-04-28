@@ -7,12 +7,28 @@
 extern "C" {
   void mlu_matmul_kernel(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W);
 }
+cnrtDev_t dev;
+class global_init {
+public:
+  global_init() {
+    cnrtInit(0);
+    // cnrtDev_t dev;
+    cnrtGetDeviceHandle(&dev, 0);
+    cnrtSetCurrentDevice(dev);
+  }
+  ~global_init() {
+    cnrtDestroy();
+  }
+};
+
+global_init init;
 
 int mlu_matmul(const float* input,const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W) {
-  cnrtInit(0);
-  cnrtDev_t dev;
-  cnrtGetDeviceHandle(&dev, 0);
-  cnrtSetCurrentDevice(dev);
+  // printf("befor init");
+  // cnrtInit(0);
+  // cnrtDev_t dev;
+  // cnrtGetDeviceHandle(&dev, 0);
+  // cnrtSetCurrentDevice(dev);
   cnrtQueue_t pQueue;
   cnrtCreateQueue(&pQueue);
   cnrtDim3_t dim;
@@ -100,7 +116,7 @@ int mlu_matmul(const float* input,const float* weight, float* output, std::size_
     printf("cnrtDestroyKernelParamsBuffer Failed!\n");
     return -1;
   }
-  cnrtDestroy();
+  // cnrtDestroy();
   free(input1_half);
   free(input2_half);
   free(output_half);

@@ -4,10 +4,11 @@ import cpu_op
 import numpy as np
 # import gpu_op
 
-M = np.random.rand(20, 900000)
-N = np.random.rand(900000, 14)
-M = np.array([[1.0, 2.0], [3.0, 4.0]])
-N = np.array([[4.0, 5.0], [6.0, 7.0]])
+M = np.random.rand(200, 900)
+N = np.random.rand(900, 140)
+print(M[0][9])
+# M = np.array([[1.0, 2.0], [3.0, 4.0]])
+# N = np.array([[4.0, 5.0], [6.0, 7.0]])
 R_ = np.matmul(M, N)
 
 def cal_time(prefix, fn):
@@ -19,11 +20,13 @@ def cal_time(prefix, fn):
     print('{} loss: {}'.format(prefix, loss))
 
 
-# cal_time('Numpy base', np.matmul)
+cal_time('Numpy base', np.matmul)
 # cpu_op.cpu_matmul_base(M, N)
 # cal_time('CPU base', cpu_op.cpu_matmul_base)
 # cal_time('GPU base', gpu_op.gpu_matmul_base)
 
 import mlu_op
-R = mlu_op.mlu_matmul_base(M, N)
-print(R)
+# R = mlu_op.mlu_matmul_base(M, N)
+# R = mlu_op.mlu_matmul_base(M, N)
+cal_time('MLU base', mlu_op.mlu_matmul_base)
+# print(R)
