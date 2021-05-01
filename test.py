@@ -4,18 +4,25 @@ import cpu_op
 import numpy as np
 # import gpu_op
 
-M = np.random.rand(200, 900)
-N = np.random.rand(900, 140)
-print(M[0][9])
+
+# print(M[0][9])
 # M = np.array([[1.0, 2.0], [3.0, 4.0]])
 # N = np.array([[4.0, 5.0], [6.0, 7.0]])
-R_ = np.matmul(M, N)
+
 
 def cal_time(prefix, fn):
+    M = np.random.rand(10001, 10005)
+    N = np.random.rand(10005, 10001)
+    R_ = np.matmul(M, N)
     t = time.process_time()
     res = fn(M, N)
     elapsed_time = time.process_time() - t
     print('{} time: {}'.format(prefix, elapsed_time))
+    loss = res - R_
+    for i in range(1001):
+        for j in range(1001):
+            if abs(loss[i][j]) > 0.001:
+                print(i, j, R_[i][j], res[i][j])
     loss = np.sum((res - R_) ** 2)
     print('{} loss: {}'.format(prefix, loss))
 
@@ -23,10 +30,13 @@ def cal_time(prefix, fn):
 cal_time('Numpy base', np.matmul)
 # cpu_op.cpu_matmul_base(M, N)
 # cal_time('CPU base', cpu_op.cpu_matmul_base)
+# cal_time('CPU transpose', cpu_op.cpu_matmul_transpose)
+# cal_time('CPU tiling', cpu_op.cpu_matmul_tiling)
+cal_time('CPU thread tiling', cpu_op.cpu_matmul_multi_thread_tiling)
 # cal_time('GPU base', gpu_op.gpu_matmul_base)
 
-import mlu_op
+# import mlu_op
 # R = mlu_op.mlu_matmul_base(M, N)
 # R = mlu_op.mlu_matmul_base(M, N)
-cal_time('MLU base', mlu_op.mlu_matmul_base)
+# cal_time('MLU base', mlu_op.mlu_matmul_base)
 # print(R)

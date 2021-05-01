@@ -8,7 +8,7 @@ add_subdirectory(pybind11)
 
 set(build-cpu ON)
 set(build-gpu OFF)
-set(build-mlu ON)
+set(build-mlu OFF)
 
 if (${build-cpu})
     add_subdirectory(CPU)
