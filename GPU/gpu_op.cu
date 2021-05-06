@@ -97,7 +97,58 @@ pybind11::array_t<double> gpu_matmul_base(pybind11::array_t<double> M, pybind11:
     };
 }
 
+pybind11::array_t<double> gpu_matmul_multi_sm(pybind11::array_t<double> M, pybind11::array_t<double> N) {
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    auto m = M.unchecked<2>();
+    auto n = N.unchecked<2>();
+    std::size_t m_x = m.shape(0);
+    std::size_t m_y = m.shape(1);
+    std::size_t n_x = n.shape(0);
+    std::size_t n_y = n.shape(1);
+    std::size_t m_size = m_x * m_y;
+    std::size_t n_size = n_x * n_y;
+    std::size_t output_size = m_x * n_y;
+    auto *result = new double[output_size];
+
+    /// =========================================
+    // in this initial implementation, we try to use as many threads as we can!
+    // in Turing architecture, we can have 1024(32*32) threads per block
+    // so we divide it like this.
+    double* d_M;
+    double* d_N;
+    double* d_out;
+    cudaMalloc(&d_M, sizeof(double) * m_size);
+    cudaMalloc(&d_N, sizeof(double) * n_size);
+    cudaMalloc(&d_out, sizeof(double) * output_size);
+    cudaMemcpy(d_M, m.data(0,0), sizeof(double) * m_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_N, n.data(0,0), sizeof(double) * n_size, cudaMemcpyHostToDevice);
+    std::chrono::steady_clock::time_point real_begin = std::chrono::steady_clock::now();
+
+
+
+    cudaDeviceSynchronize();
+    cudaMemcpy(result, d_out, sizeof(double) * output_size, cudaMemcpyDeviceToHost);
+    cudaFree(d_M);
+    cudaFree(d_N);
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "Time " <<  std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << std::endl;
+    std::cout << "Real Time " <<  std::chrono::duration_cast<std::chrono::milliseconds>(end - real_begin).count() << std::endl;
+    /// =========================================
+
+    pybind11::capsule free_when_done(result, [](void *f) {
+        auto *foo = reinterpret_cast<double *>(f);
+        delete[] foo;
+    });
+    return pybind11::array_t<double> {
+            {m_x, n_y},
+            result,
+            free_when_done
+    };
+}
+
+
 PYBIND11_MODULE(gpu_op, m){
     m.doc() = "matmul & conv with gpu";
     m.def("gpu_matmul_base", &gpu_matmul_base, "multiply 2 matrix");
+    m.def("gpu_matmul_multi_sm", &gpu_matmul_multi_sm, "multiply 2 matrix using many SMs");
 }
