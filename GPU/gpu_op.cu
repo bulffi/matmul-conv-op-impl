@@ -75,6 +75,36 @@ __global__ void TB_aware_block_element(const double* M, const double* N, double*
     }
 }
 
+__global__ void TB_aware_block_element_tiling(const double* M, const double* N, double* out, int m_x, int m_y,
+                                              int n_y) {
+    __shared__ double M_shared[16][16];
+    __shared__ double N_shared[16][16];
+    unsigned point_x = blockIdx.x * 16 + threadIdx.x;
+    unsigned point_y = blockIdx.y * 16 + threadIdx.y;
+
+    double value = 0;
+    for (int i = 0; i <= m_y / 16; i++) {
+        if (i * 16 + threadIdx.y < m_y) {
+            M_shared[threadIdx.x][threadIdx.y] = M[point_x * m_y + i * 16 + threadIdx.y];
+        } else {
+            M_shared[threadIdx.x][threadIdx.y] = 0;
+        }
+        if (i * 16 + threadIdx.x < m_y) {
+            N_shared[threadIdx.x][threadIdx.y] = N[(i * 16 + threadIdx.x) * n_y + point_y];
+        } else {
+            N_shared[threadIdx.x][threadIdx.y] = 0;
+        }
+        __syncthreads();
+        for (int j = 0; j < 16; j++) {
+            value += M_shared[threadIdx.x][j] * N_shared[j][threadIdx.y];
+        }
+        __syncthreads();
+    }
+    if (point_x < m_x && point_y < n_y) {
+        out[point_x * n_y + point_y] = value;
+    }
+}
+
 pybind11::array_t<double> gpu_matmul_base(pybind11::array_t<double> M, pybind11::array_t<double> N) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     auto m = M.unchecked<2>();
@@ -196,7 +226,6 @@ pybind11::array_t<double> gpu_matmul_multi_sm(pybind11::array_t<double> M, pybin
     };
 }
 
-
 pybind11::array_t<double> gpu_matmul_multi_sm_tiling(pybind11::array_t<double> M, pybind11::array_t<double> N) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     auto m = M.unchecked<2>();
@@ -225,9 +254,19 @@ pybind11::array_t<double> gpu_matmul_multi_sm_tiling(pybind11::array_t<double> M
     cudaMemcpy(d_M, m.data(0,0), sizeof(double) * m_size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_N, n.data(0,0), sizeof(double) * n_size, cudaMemcpyHostToDevice);
     std::chrono::steady_clock::time_point real_begin = std::chrono::steady_clock::now();
-
-
-
+    if (m_x < 16 || n_y < 16) {
+        dim3 threadDim{static_cast<unsigned int>(m_x), static_cast<unsigned int>(n_y), 1};
+        single_element<<<1, threadDim>>>(d_M, d_N, d_out, m_y, n_y);
+    } else {
+        // we simplify the process
+        // we use 16*16 per thread block
+        // each thread handle a single element
+        int tb_x = m_x / 16 + 1;
+        int tb_y = n_y / 16 + 1;
+        dim3 grid_dim{static_cast<unsigned int>(tb_x), static_cast<unsigned int>(tb_y), 1};
+        dim3 tb_dim{16, 16, 1};
+        TB_aware_block_element_tiling<<<grid_dim, tb_dim>>>(d_M, d_N, d_out, m_x, m_y, n_y);
+    }
     cudaDeviceSynchronize();
     cudaMemcpy(result, d_out, sizeof(double) * output_size, cudaMemcpyDeviceToHost);
     cudaFree(d_M);
