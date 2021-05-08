@@ -5,8 +5,10 @@ __mlu_entry__ void mlu_matmul_kernel_multi_sram(half* input1, half* input2, half
     __ldram__ half m_ld_buf[256 * 1024];
     __ldram__ half n_ld_buf[256 * 1024];
     __ldram__ half out_buf[256 * 256];
+    __ldramset(out_buf, 256 * 256, 0);
 
-    // __wram__ half result[256 * 256];
+    __wram__ half tempt_buffer[256 * 256];
+    __memcpy(tempt_buffer, out_buf, 256 * 256 * sizeof(half), LDRAM2WRAM);
 
     __mlu_shared__ half res_buf[256 * 1024];
     __sramset(res_buf, 256 * 1024, 0);
@@ -31,14 +33,15 @@ __mlu_entry__ void mlu_matmul_kernel_multi_sram(half* input1, half* input2, half
         __memcpy(m_w_buf, m_ld_buf + i * 256, 256 * sizeof(half), LDRAM2NRAM, 256 * sizeof(half), 1024 * sizeof(half), 256);
         __memcpy(n_w_buf, n_ld_buf + i * 256 * 256, 256 * 256 * sizeof(half), LDRAM2NRAM);
         __bang_transpose(n_trans_W, n_w_buf, 256, 256);
+        __memcpy(n_w_buf, tempt_buffer, 256 * 256 * sizeof(half), WRAM2NRAM);
         for (int p = 0; p < 256; p++) {
             for (int q = 0; q < 256; q++) {
                 __bang_mul(line_mul, m_w_buf + p * 256, n_trans_W + q * 256, 256);
                 __bang_reduce_sum(line_sum, line_mul, 256);
-                out_buf[p * 256 + q] += line_sum[0] + line_sum[64] + line_sum[128] + line_sum[192];
+                n_w_buf[p * 256 + q] += line_sum[0] + line_sum[64] + line_sum[128] + line_sum[192];
             }
         }
+        __memcpy(tempt_buffer, n_w_buf, 256 * 256 * sizeof(half), NRAM2WRAM);
     }
-    // __sync_cluster();
-    __memcpy(output + x * 1024 * 256 + y * 256, out_buf, 256 * sizeof(half), LDRAM2GDRAM, 1024 * sizeof(half), 256 * sizeof(half), 256);
+    __memcpy(output + x * 1024 * 256 + y * 256, n_w_buf, 256 * sizeof(half), NRAM2GDRAM, 1024 * sizeof(half), 256 * sizeof(half), 256);
 }
