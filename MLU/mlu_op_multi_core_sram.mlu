@@ -5,20 +5,19 @@ __mlu_entry__ void mlu_matmul_kernel_multi_sram(half* input1, half* input2, half
     __ldram__ half m_ld_buf[256 * 1024];
     __ldram__ half n_ld_buf[256 * 1024];
     __ldram__ half out_buf[256 * 256];
-    __ldramset(out_buf, 256 * 256, 0);
+    // __ldramset(out_buf, 256 * 256, 0);
 
-    __wram__ half tempt_buffer[256 * 256];
-    __memcpy(tempt_buffer, out_buf, 256 * 256 * sizeof(half), LDRAM2WRAM);
-
-    __mlu_shared__ half res_buf[256 * 1024];
-    __sramset(res_buf, 256 * 1024, 0);
-
+    
     __nram__ half m_w_buf[256 * 256];
     __nram__ half n_w_buf[256 * 256];
     __nram__ half n_trans_W[256 * 256];
     __nram__ half line_mul[256];
     __nram__ half line_sum[256];
 
+    __nramset(m_w_buf, 256 * 256, 0);
+
+    __wram__ half tempt_buffer[256 * 256];
+    __memcpy(tempt_buffer, m_w_buf, 256 * 256 * sizeof(half), NRAM2WRAM);
 
     int x = taskId / 4;
     int y = taskId % 4;
