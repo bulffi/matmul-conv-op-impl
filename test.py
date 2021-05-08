@@ -11,8 +11,8 @@ import gpu_op
 
 
 def cal_time(prefix, fn):
-    M = np.random.rand(1024, 1) * 0.1 - 0.05
-    N = np.random.rand(1, 1024) * 0.1 - 0.05
+    M = np.random.rand(1024, 100) * 0.1 - 0.05
+    N = np.random.rand(100, 1024) * 0.1 - 0.05
     R_ = np.matmul(M, N)
     t = time.process_time()
     res = fn(M, N)
@@ -41,5 +41,6 @@ cal_time('Numpy base', np.matmul)
 import mlu_op
 # R = mlu_op.mlu_matmul_base(M, N)
 # R = mlu_op.mlu_matmul_base(M, N)
-cal_time('MLU base', mlu_op.mlu_matmul_base)
+# cal_time('MLU base', mlu_op.mlu_matmul_base)
+cal_time('MLU multi core', mlu_op.mlu_matmul_multicore)
 # print(R)
