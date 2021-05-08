@@ -207,7 +207,6 @@ int multi_thread_worker(const double *M, const double *N, double *output, std::s
 }
 
 pybind11::array_t<double> cpu_matmul_multi_thread_tiling(const pybind11::array_t<double>& M, const pybind11::array_t<double>& N) {
-    std::cout << "It's my turn" << std::endl;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     auto m = M.unchecked<2>();
     auto n = N.unchecked<2>();

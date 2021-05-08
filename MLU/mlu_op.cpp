@@ -3,9 +3,11 @@
 #include "cnrt.h"
 #include "cnrt_data.h"
 #include "stdio.h"
+#include <chrono>
+#include <iostream>
 
 extern "C" {
-  void mlu_matmul_kernel(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W);
+  void mlu_matmul_kernel_base(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W);
 }
 cnrtDev_t dev;
 class global_init {
@@ -23,12 +25,8 @@ public:
 
 global_init init;
 
-int mlu_matmul(const float* input,const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W) {
-  // printf("befor init");
-  // cnrtInit(0);
-  // cnrtDev_t dev;
-  // cnrtGetDeviceHandle(&dev, 0);
-  // cnrtSetCurrentDevice(dev);
+int mlu_matmul_base(const float* input,const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W) {
+  std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   cnrtQueue_t pQueue;
   cnrtCreateQueue(&pQueue);
   cnrtDim3_t dim;
@@ -79,8 +77,8 @@ int mlu_matmul(const float* input,const float* weight, float* output, std::size_
   cnrtKernelParamsBufferAddParam(params, &W, sizeof(int)); 
   cnrtPlaceNotifier(event_start, pQueue);
 
-  // TODO：完成cnrtInvokeKernel函数
-  cnrtInvokeKernel_V2((void*)&mlu_matmul_kernel, dim, params, c, pQueue);
+  std::chrono::steady_clock::time_point real_begin = std::chrono::steady_clock::now();
+  cnrtInvokeKernel_V2((void*)&mlu_matmul_kernel_base, dim, params, c, pQueue);
   
 
   if (CNRT_RET_SUCCESS != cnrtSyncQueue(pQueue))
@@ -120,6 +118,10 @@ int mlu_matmul(const float* input,const float* weight, float* output, std::size_
   free(input1_half);
   free(input2_half);
   free(output_half);
-  
+
+  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  std::cout << "Time " <<  std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << std::endl;
+  std::cout << "Real Time " <<  std::chrono::duration_cast<std::chrono::milliseconds>(end - real_begin).count() << std::endl;
+
   return 0;
 }

@@ -2,7 +2,7 @@ add_custom_command(
     OUTPUT 
         ${CMAKE_CURRENT_SOURCE_DIR}/libmlu.so
         ${CMAKE_CURRENT_SOURCE_DIR}/__header.h
-    COMMAND make
+    COMMAND "make"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

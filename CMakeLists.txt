@@ -7,8 +7,8 @@ cmake_minimum_required(VERSION 3.10)
 add_subdirectory(pybind11)
 
 set(build-cpu ON)
-set(build-gpu ON)
-set(build-mlu OFF)
+set(build-gpu OFF)
+set(build-mlu ON)
 
 if (${build-cpu})
     add_subdirectory(CPU)
