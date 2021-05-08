@@ -1,0 +1,15 @@
+__mlu_entry__ void mlu_matmul_kernel_base(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W) {
+  __bang_printf("in kernel %d %d %d \n", H, K, W);
+  int count = 0;
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      half result = 0;
+      for (int k = 0; k < K; k++) {
+        result += input1[i * K + k] * input2[k * W + j];
+      }
+      output[i * W + j] = result;
+      // count++;
+      // __bang_printf("%d\n", count);
+    }
+  }
+}

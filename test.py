@@ -11,8 +11,8 @@ import gpu_op
 
 
 def cal_time(prefix, fn):
-    M = np.random.rand(12, 13)
-    N = np.random.rand(13, 14)
+    M = np.random.rand(1024, 1) * 0.1 - 0.05
+    N = np.random.rand(1, 1024) * 0.1 - 0.05
     R_ = np.matmul(M, N)
     t = time.process_time()
     res = fn(M, N)

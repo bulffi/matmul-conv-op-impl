@@ -14,7 +14,7 @@ add_custom_target(
 add_library(
     mlu_op
     SHARED
-    mlu_op_pybind_wrapper.cpp
+    mlu_pybind_wrapper.cpp
 )
 
 add_dependencies(

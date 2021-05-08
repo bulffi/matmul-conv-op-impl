@@ -1,7 +1,6 @@
 #define NRAM_SIZE 512000
 #define NRAM_ELEMENT_COUNT (NRAM_SIZE / sizeof(half))
-
-__mlu_entry__ void mlu_matmul_kernel_base(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W) {
+__mlu_entry__ void mlu_matmul_kernel_ram(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W) {
   
   // sigle core processing
   // assume any matrix is less than 512KB
