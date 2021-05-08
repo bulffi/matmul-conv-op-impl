@@ -1,0 +1,4 @@
+__mlu_entry__ void mlu_matmul_kernel_multi_core(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W) {
+
+    
+}
