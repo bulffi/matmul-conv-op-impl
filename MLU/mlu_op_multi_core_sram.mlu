@@ -1,4 +1,49 @@
-__mlu_entry__ void mlu_matmul_kernel_multi_sram(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W) {
+#include "mlu.h"
 
-    
+__mlu_entry__ void mlu_matmul_kernel_multi_sram(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W) {
+    // __bang_printf("%d %d %d\n", clusterId, coreId, taskId);
+    __ldram__ half m_ld_buf[256 * 1024];
+    __ldram__ half n_ld_buf[256 * 1024];
+    __ldram__ half out_buf[256 * 256];
+
+    // __wram__ half result[256 * 256];
+
+    __nram__ half m_w_buf[256 * 256];
+    __nram__ half n_w_buf[256 * 256];
+    __nram__ half n_trans_W[256 * 256];
+    __nram__ half line_mul[256];
+    __nram__ half line_sum[256];
+
+
+    int x = taskId / 4;
+    int y = taskId % 4;
+
+    // half tempt = 0;
+
+    // load gdram -> ldram
+    __memcpy(m_ld_buf, input1 + x * 256 * 1024, 256 * 1024 * sizeof(half), GDRAM2LDRAM);
+    __memcpy(n_ld_buf, input2 + y * 256, 256 * sizeof(half), GDRAM2LDRAM, 256 * sizeof(half), 1024 * sizeof(half), 1024);
+    // load ldram -> nram
+    for (int i = 0; i < 4; i++) {
+        __memcpy(m_w_buf, m_ld_buf + i * 256, 256 * sizeof(half), LDRAM2NRAM, 256 * sizeof(half), 1024 * sizeof(half), 256);
+        __memcpy(n_w_buf, n_ld_buf + i * 256 * 256, 256 * 256 * sizeof(half), LDRAM2NRAM);
+        __bang_transpose(n_trans_W, n_w_buf, 256, 256);
+        for (int p = 0; p < 256; p++) {
+            for (int q = 0; q < 256; q++) {
+                __bang_mul(line_mul, m_w_buf + p * 256, n_trans_W + q * 256, 256);
+                __bang_reduce_sum(line_sum, line_mul, 256);
+                out_buf[p * 256 + q] = line_sum[0] + line_sum[65] + line_sum[129] + line_sum[193];
+            }
+        }
+    }
+    // __memcpy(out_buf, result, 256 * 256 * sizeof(half), WRAM2LDRAM);
+    __memcpy(output + x * 1024 * 256 + y * 256, out_buf, 256, LDRAM2GDRAM, 1024 * sizeof(half), 256 * sizeof(half), 256);
+    // transpose n
+    // __bang_transpose(n_trans_W[0], n_w_buf[0], 256, 256);
+
+    // sum every line
+    // __bang_mul();
+
+    // get final result
+    // __bang_reduce_sum();
 }

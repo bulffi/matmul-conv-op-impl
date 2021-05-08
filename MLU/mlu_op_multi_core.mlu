@@ -1,17 +1,17 @@
 __mlu_entry__ void mlu_matmul_kernel_multi_core(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W) {
 
     // __bang_printf("%d %d\n", taskIdX, taskIdY);
-    int x_range = H / 16;
-    int y_range = W / 16;
-    int x_start = x_range * taskIdX;
-    int y_start = y_range * taskIdY;
+    int x_range = H / 4;
+    int y_range = W / 4;
+    int x_start = x_range * (taskId / 4);
+    int y_start = y_range * (taskId % 4);
     int x_end = x_start + x_range;
     int y_end = y_start + y_range;
     
-    if (taskIdX == 15) {
+    if ((taskId / 4) == 3) {
         x_end = H;
     }
-    if (taskIdY == 15) {
+    if ((taskId % 4) == 3) {
         y_end = W;
     }
 
