@@ -13,14 +13,16 @@ import gpu_op
 def cal_time(prefix, fn):
     M = np.random.rand(1024, 1024) * 0.1 - 0.05
     N = np.random.rand(1024, 1024) * 0.1 - 0.05
+    # M = np.ones((1024, 1024))
+    # N = np.ones((1024, 1024))
     R_ = np.matmul(M, N)
     t = time.time()
     res = fn(M, N)
     elapsed_time = time.time() - t
     print('{} time: {}'.format(prefix, elapsed_time))
     loss = res - R_
-    for i in range(12):
-        for j in range(14):
+    for i in range(256):
+        for j in range(256):
             if abs(loss[i][j]) > 0.1:
                 print(i, j, R_[i][j], res[i][j])
     loss = np.sum((res - R_) ** 2)
