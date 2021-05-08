@@ -4,40 +4,7 @@ __mlu_entry__ void mlu_matmul_kernel_ram(half* input1, half* input2, half* outpu
   
   // sigle core processing
   // assume any matrix is less than 512KB
-  if (taskId > 0) return;
-  __nram__ half zeros[NRAM_ELEMENT_COUNT];
-  __nramset(zeros, NRAM_ELEMENT_COUNT, 0);
-  __memcpy(output, zeros, sizeof(half) * H * W, NRAM2GDRAM);
-
-  __ldram__ half ld_buf[2 * NRAM_ELEMENT_COUNT];
-  __memcpy(ld_buf, input1, sizeof(half) * H * K, GDRAM2LDRAM);
-  __memcpy(ld_buf + NRAM_ELEMENT_COUNT, input2, sizeof(half) * K * W, GDRAM2LDRAM);
-
-  __mlu_shared__ half A_buf[NRAM_ELEMENT_COUNT];
-  __mlu_shared__ half B_buf[NRAM_ELEMENT_COUNT];
-
-  __memcpy(A_buf, ld_buf, sizeof(half) * H * K, LDRAM2SRAM);
-  __memcpy(B_buf, ld_buf + NRAM_ELEMENT_COUNT, sizeof(half) * K * W, LDRAM2SRAM);
-
   
-  for (int i = 0; i < H; i++) {
-    // load a row of A
-    half* row = zeros;
-    __memcpy(row, A_buf + i * K, sizeof(half) * K, SRAM2NRAM);
-    for (int j = 0; j < W; j++) {
-      half tempt_sum = 0;
-      // load a col of B
-      half* col = zeros + (NRAM_ELEMENT_COUNT / 2);
-      __memcpy(col, B_buf + j, sizeof(half), SRAM2NRAM, sizeof(half), sizeof(half) * W, K - 1);
-      // __bang_mul(col, row, K);
-      for (int k = 0; k < K; k++) {
-        // __bang_printf("%hf %hf\n", row[i], col[i]);
-        tempt_sum += row[k] * col[k];
-      }
-      // __bang_printf("%hf\n", tempt_sum);
-      output[i * W + j] = tempt_sum;
-    }
-  }
 
   return;
 }

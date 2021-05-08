@@ -8,8 +8,6 @@ __mlu_entry__ void mlu_matmul_kernel_base(half* input1, half* input2, half* outp
         result += input1[i * K + k] * input2[k * W + j];
       }
       output[i * W + j] = result;
-      // count++;
-      // __bang_printf("%d\n", count);
     }
   }
 }

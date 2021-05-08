@@ -8,6 +8,9 @@
 
 extern "C" {
   void mlu_matmul_kernel_base(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W);
+  void mlu_matmul_kernel_ram(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W);
+  void mlu_matmul_kernel_multi_core(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W);
+  void mlu_matmul_kernel_multi_sram(half* input1, half* input2, half* output, int32_t H, int32_t K, int32_t W);
 }
 cnrtDev_t dev;
 class global_init {
@@ -124,4 +127,16 @@ int mlu_matmul_base(const float* input,const float* weight, float* output, std::
   std::cout << "Real Time " <<  std::chrono::duration_cast<std::chrono::milliseconds>(end - real_begin).count() << std::endl;
 
   return 0;
+}
+
+int mlu_matmul_ram(const float* input,const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W) {
+
+}
+
+int mlu_matmul_multi_core(const float* input,const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W) {
+
+}
+
+int mlu_matmul_multi_sram(const float* input,const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W) {
+
 }

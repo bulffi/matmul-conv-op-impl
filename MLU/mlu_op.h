@@ -12,6 +12,9 @@ extern "C" {
 #endif
 
     int mlu_matmul_base(const float* input, const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W);
+    int mlu_matmul_ram(const float* input, const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W);
+    int mlu_matmul_multi_core(const float* input, const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W);
+    int mlu_matmul_multi_sram(const float* input, const float* weight, float* output, std::size_t H, std::size_t K, std::size_t W);
 
 #ifdef __cplusplus
 }
